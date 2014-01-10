@@ -4,8 +4,11 @@ Wjsonduino
 Project to draw an svg image with Arduino input in a web browser with json.
 
 Hardware:
+
 Arduino UNO
+
 Arduino original Ethernet shield
+
 
 Your comments and suggestion are welcomed to alberto[at]panu.it
 
