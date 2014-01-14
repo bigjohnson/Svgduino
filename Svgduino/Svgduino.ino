@@ -60,6 +60,7 @@ byte ip[] = { 192, 168, 0, 5 };
 byte gateway[] = { 192, 168, 0, 1 };
 byte subnet[] = { 255, 255, 255, 0 };
 
+
 /*********************************************/
 // Substitute with the eth shiel mac address
 static uint8_t mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
@@ -80,18 +81,7 @@ boolean json_handler(MyTinyWebServer& web_server) {
   web_server.end_headers();
   
   web_server << F("processData( { \"digital\" : [ ");
-    /*for (byte i=0; i < ioportsnum; i++) {
-      web_server << F("\"IO");
-      web_server << (int) ioports[i];
-      web_server << F("\" : \"");
-      //if (digitalRead(ioports[i])) {
-        if (ioportsStatus[i]) {
-        web_server << F("H");
-      } else {
-        web_server << F("L");
-      }
-      web_server << F("\", ");
-    }*/
+
     for (byte i=0; i < ioportsnum; i++) {
        if (ioportsStatus[i]) {
         web_server << F("\"H\"");
@@ -102,21 +92,18 @@ boolean json_handler(MyTinyWebServer& web_server) {
          web_server << F(", ");
        }
     }
-    web_server << F(" ], \"analog\" : [ ");
     
-    /*
-    for (byte i=0; i < 6; i++){
-      web_server << F("\"AD");
-      web_server << (int) i;
-      web_server << F("\" : \"");
-//      web_server << analogRead(i);
-       web_server << analogValues[i];
+    web_server << F(" ], \"digname\" : [ ");
+    for (byte i=0; i < ioportsnum; i++) {
       web_server << F("\"");
-      if ( i < 5) {
+      web_server << ioports[i];
+      web_server << F("\"");
+      if ( i < (ioportsnum - 1)) {
         web_server << F(", ");
       }
     }
-    */
+    
+    web_server << F(" ], \"analog\" : [ ");
     for (byte i=0; i < 6; i++){
       web_server << F("\"");
       web_server << analogValues[i];
@@ -148,15 +135,15 @@ var mu=2.048;\n\
 var it;\n\
 var lastexecutiontime;\n\
 var ajaxisrunning;\n\
-var ph=\"HIGH\";\n\
-var pl=\"LOW\";\n\
+var ph=\"H\";\n\
+var pl=\"L\";\n\
 var f=\"fill\";\n\
 var g=\"green\";\n\
 var r=\"red\";\n\
 var h=\"height\";\n\
 var s=\"H\";\n\
 var y=\"y\";\n\
-var x=\"XX\";\n\
+var x=\"X\";\n\
 \n\
 function prepare(){\n\
  var SVGimage=document.getElementById(\"immagine\");\n\
@@ -230,16 +217,17 @@ function processData(JSONData) {\n\
   ajaxisrunning = true;\n\
   avviso.firstChild.data=\"Arduino connected\";\n\
   for (i=0; i<=6; i++) {\n\
+    var pn=JSONData.digname[i]\n\
     if (JSONData.digital[i] == s) {\n\
      di[i].setAttribute(f, g);\n\
-     lad[i].textContent=ph;\n\
+     lad[i].textContent=\"D\"+pn+\"=\"+ph;\n\
     } else {\n\
       di[i].setAttribute(f, r);\n\
-      lad[i].textContent=pl;\n\
+      lad[i].textContent=\"D\"+pn+\"=\"+pl;\n\
     }\n\
   }\n\
   for (i=0; i<=5; i++) {\n\
-    laa[i].textContent=JSONData.analog[i];\n\
+    laa[i].textContent=\"A\"+i+\"=\"+JSONData.analog[i];\n\
     an[i].setAttribute(h, JSONData.analog[i] / mu);\n\
     an[i].setAttribute(y, 549 - ( JSONData.analog[i] / mu));\n\
     if (JSONData.analog[i] > ma) {\n\
@@ -258,10 +246,10 @@ function processData(JSONData) {\n\
 function cambiacolore(c) {\n\
 for (i=0; i<=6; i++) {\n\
  di[i].setAttribute(f, c);\n\
- lad[i].textContent=x;\n\
+ lad[i].textContent=\"   \"+x;\n\
  }\n\
 for (var i=0; i<6; i++) {\n\
-  laa[i].textContent=x;\n\
+  laa[i].textContent=\"  A\"+i+\"=\"+x;\n\
   an[i].setAttribute(h, 500);\n\
   an[i].setAttribute(y, 50);\n\
   an[i].setAttribute(f, c);\n\
@@ -296,7 +284,7 @@ function ferma() {\n\
  }\n\
  cambiacolore(\"aquamarine\");\n\
  avviso.firstChild.data=\"Suspended app, to run click on Start\";\n\
- momento_differenza.firstChild.data=\"X\";        \n\
+ momento_differenza.firstChild.data=\"X\";\n\
  buttonferma.disabled=true;\n\
 }\n\
 \n\
@@ -353,28 +341,28 @@ boolean svg_handler(MyTinyWebServer& web_server) {
 <rect id=\"a5\" x=\"475\" y=\"50\" fill=\"#7FFFD4\" width=\"50\" height=\"500\"/>\n\
 <line fill=\"none\" stroke=\"#000000\" x1=\"550\" y1=\"550\" x2=\"75\" y2=\"550\"/>\n\
 <line fill=\"none\" stroke=\"#000000\" x1=\"75\" y1=\"550\" x2=\"75\" y2=\"50\"/>\n\
+<line fill=\"none\" stroke=\"#000000\" x1=\"550\" y1=\"550\" x2=\"550\" y2=\"50\"/>\n\
 <line fill=\"none\" stroke=\"#000000\" x1=\"75\" y1=\"150\" x2=\"550\" y2=\"150\"/>\n\
 <line fill=\"none\" stroke=\"#000000\" x1=\"75\" y1=\"50\" x2=\"550\" y2=\"50\"/>\n\
 <line fill=\"none\" stroke=\"#000000\" x1=\"75\" y1=\"250\" x2=\"550\" y2=\"250\"/>\n\
 <line fill=\"none\" stroke=\"#000000\" x1=\"75\" y1=\"350\" x2=\"550\" y2=\"350\"/>\n\
 <line fill=\"none\" stroke=\"#000000\" x1=\"75\" y1=\"450\" x2=\"550\" y2=\"450\"/>\n\
 <line fill=\"none\" stroke=\"#000000\" x1=\"75\" y1=\"200\" x2=\"80\" y2=\"200\"/>\n\
-<line fill=\"none\" stroke=\"#000000\" x1=\"550\" y1=\"550\" x2=\"550\" y2=\"50\"/>\n\
-<line fill=\"none\" stroke=\"#000000\" stroke-dasharray=\"12,12\" x1=\"84\" y1=\"200\" x2=\"544\" y2=\"200\"/>\n\
-<line fill=\"none\" stroke=\"#000000\" stroke-dasharray=\"12,12\" x1=\"84\" y1=\"100\" x2=\"544\" y2=\"100\"/>\n\
-<line fill=\"none\" stroke=\"#000000\" stroke-dasharray=\"12,12\" x1=\"84\" y1=\"300\" x2=\"544\" y2=\"300\"/>\n\
-<line fill=\"none\" stroke=\"#000000\" stroke-dasharray=\"12,12\" x1=\"84\" y1=\"400\" x2=\"544\" y2=\"400\"/>\n\
-<line fill=\"none\" stroke=\"#000000\" stroke-dasharray=\"12,12\" x1=\"84\" y1=\"500\" x2=\"544\" y2=\"500\"/>\n\
-<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"84\" y1=\"75\" x2=\"544\" y2=\"75\"/>\n\
-<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"84\" y1=\"223\" x2=\"544\" y2=\"223\"/>\n\
-<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"84\" y1=\"175\" x2=\"544\" y2=\"175\"/>\n\
-<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"84\" y1=\"275\" x2=\"544\" y2=\"275\"/>\n\
-<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"84\" y1=\"125\" x2=\"544\" y2=\"125\"/>\n\
-<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"84\" y1=\"475\" x2=\"544\" y2=\"475\"/>\n\
-<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"84\" y1=\"425\" x2=\"544\" y2=\"425\"/>\n\
-<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"84\" y1=\"375\" x2=\"544\" y2=\"375\"/>\n\
-<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"84\" y1=\"325\" x2=\"544\" y2=\"325\"/>\n\
-<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"84\" y1=\"525\" x2=\"544\" y2=\"525\"/>\n\
+<line fill=\"none\" stroke=\"#000000\" stroke-dasharray=\"12,12\" x1=\"83\" y1=\"200\" x2=\"544\" y2=\"200\"/>\n\
+<line fill=\"none\" stroke=\"#000000\" stroke-dasharray=\"12,12\" x1=\"83\" y1=\"100\" x2=\"544\" y2=\"100\"/>\n\
+<line fill=\"none\" stroke=\"#000000\" stroke-dasharray=\"12,12\" x1=\"83\" y1=\"300\" x2=\"544\" y2=\"300\"/>\n\
+<line fill=\"none\" stroke=\"#000000\" stroke-dasharray=\"12,12\" x1=\"83\" y1=\"400\" x2=\"544\" y2=\"400\"/>\n\
+<line fill=\"none\" stroke=\"#000000\" stroke-dasharray=\"12,12\" x1=\"83\" y1=\"500\" x2=\"544\" y2=\"500\"/>\n\
+<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"83\" y1=\"75\" x2=\"544\" y2=\"75\"/>\n\
+<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"83\" y1=\"223\" x2=\"544\" y2=\"223\"/>\n\
+<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"83\" y1=\"175\" x2=\"544\" y2=\"175\"/>\n\
+<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"83\" y1=\"275\" x2=\"544\" y2=\"275\"/>\n\
+<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"83\" y1=\"125\" x2=\"544\" y2=\"125\"/>\n\
+<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"83\" y1=\"475\" x2=\"544\" y2=\"475\"/>\n\
+<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"83\" y1=\"425\" x2=\"544\" y2=\"425\"/>\n\
+<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"83\" y1=\"375\" x2=\"544\" y2=\"375\"/>\n\
+<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"83\" y1=\"325\" x2=\"544\" y2=\"325\"/>\n\
+<line fill=\"none\" stroke=\"#000000\" stroke-miterlimit=\"10\" stroke-dasharray=\"6,6\" x1=\"83\" y1=\"525\" x2=\"544\" y2=\"525\"/>\n\
 <text transform=\"matrix(1 0 0 1 30 60)\" font-size=\"36\">5v</text>\n\
 <text transform=\"matrix(1 0 0 1 30 160)\" font-size=\"36\">4v</text>\n\
 <text transform=\"matrix(1 0 0 1 30 258)\" font-size=\"36\">3v</text>\n\
@@ -385,12 +373,12 @@ boolean svg_handler(MyTinyWebServer& web_server) {
 <text transform=\"matrix(1 0 0 1 30 305)\" font-size=\"18\">2,5v</text>\n\
 <text transform=\"matrix(1 0 0 1 30 405)\" font-size=\"18\">1,5v</text>\n\
 <text transform=\"matrix(1 0 0 1 30 505)\" font-size=\"18\">0,5v</text>\n\
-<text id=\"la0\" transform=\"matrix(1 0 0 1 100 572)\" font-size=\"18\">XX</text>\n\
-<text id=\"la1\" transform=\"matrix(1 0 0 1 175 572)\" font-size=\"18\">XX</text>\n\
-<text id=\"la2\" transform=\"matrix(1 0 0 1 250 572)\" font-size=\"18\">XX</text>\n\
-<text id=\"la3\" transform=\"matrix(1 0 0 1 325 572)\" font-size=\"18\">XX</text>\n\
-<text id=\"la4\" transform=\"matrix(1 0 0 1 400 572)\" font-size=\"18\">XX</text>\n\
-<text id=\"la5\" transform=\"matrix(1 0 0 1 477 572)\" font-size=\"18\">XX</text>\n\
+<text id=\"la0\" transform=\"matrix(1 0 0 1 95 572)\" font-size=\"15\">  A0=X</text>\n\
+<text id=\"la1\" transform=\"matrix(1 0 0 1 170 572)\" font-size=\"15\">  A1=X</text>\n\
+<text id=\"la2\" transform=\"matrix(1 0 0 1 245 572)\" font-size=\"15\">  A2=X</text>\n\
+<text id=\"la3\" transform=\"matrix(1 0 0 1 320 572)\" font-size=\"15\">  A3=X</text>\n\
+<text id=\"la4\" transform=\"matrix(1 0 0 1 395 572)\" font-size=\"15\">  A4=X</text>\n\
+<text id=\"la5\" transform=\"matrix(1 0 0 1 472 572)\" font-size=\"15\">  A5=X</text>\n\
 <rect id=\"d0\" x=\"44\" y=\"600\" fill=\"#7FFFD4\" width=\"68\" height=\"55\"/>\n\
 <rect id=\"d1\" x=\"121\" y=\"600\" fill=\"#7FFFD4\" width=\"68\" height=\"55\"/>\n\
 <rect id=\"d2\" x=\"200\" y=\"600\" fill=\"#7FFFD4\" width=\"68\" height=\"55\"/>\n\
@@ -398,13 +386,13 @@ boolean svg_handler(MyTinyWebServer& web_server) {
 <rect id=\"d4\" x=\"356\" y=\"600\" fill=\"#7FFFD4\" width=\"68\" height=\"55\"/>\n\
 <rect id=\"d5\" x=\"433\" y=\"600\" fill=\"#7FFFD4\" width=\"68\" height=\"55\"/>\n\
 <rect id=\"d6\" x=\"510\" y=\"600\" fill=\"#7FFFD4\" width=\"68\" height=\"55\"/>\n\
-<text id=\"ld0\" transform=\"matrix(1 0 0 1 60 630)\" font-size=\"18\">XX</text>\n\
-<text id=\"ld1\" transform=\"matrix(1 0 0 1 138 630)\" font-size=\"18\">XX</text>\n\
-<text id=\"ld2\" transform=\"matrix(1 0 0 1 217 630)\" font-size=\"18\">XX</text>\n\
-<text id=\"ld3\" transform=\"matrix(1 0 0 1 295 630)\" font-size=\"18\">XX</text>\n\
-<text id=\"ld4\" transform=\"matrix(1 0 0 1 373 630)\" font-size=\"18\">XX</text>\n\
-<text id=\"ld5\" transform=\"matrix(1 0 0 1 450 630)\" font-size=\"18\">XX</text>\n\
-<text id=\"ld6\" transform=\"matrix(1 0 0 1 526 630)\" font-size=\"18\">XX</text>\n\
+<text id=\"ld0\" transform=\"matrix(1 0 0 1 55 630)\" font-size=\"18\">   X</text>\n\
+<text id=\"ld1\" transform=\"matrix(1 0 0 1 133 630)\" font-size=\"18\">   X</text>\n\
+<text id=\"ld2\" transform=\"matrix(1 0 0 1 212 630)\" font-size=\"18\">   X</text>\n\
+<text id=\"ld3\" transform=\"matrix(1 0 0 1 290 630)\" font-size=\"18\">   X</text>\n\
+<text id=\"ld4\" transform=\"matrix(1 0 0 1 368 630)\" font-size=\"18\">   X</text>\n\
+<text id=\"ld5\" transform=\"matrix(1 0 0 1 445 630)\" font-size=\"18\">   X</text>\n\
+<text id=\"ld6\" transform=\"matrix(1 0 0 1 521 630)\" font-size=\"18\">   X</text>\n\
 </svg>" );
     #ifdef DEBUG
       Serial << F("Sent Image\n");
