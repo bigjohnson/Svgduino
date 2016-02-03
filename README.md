@@ -1,4 +1,4 @@
-Wjsonduino
+Svgduino
 ==========
 
 Project to draw an svg image with Arduino input in a web browser with json.
